@@ -6,10 +6,15 @@ from random import randint
 from time import sleep
 
 def find_urls(initial_url):
+    """
+    :param initial_url:
+    :return: web scrapes a table to find a list of urls, specialized for fbref.com,
+    maybe think about adding this as a parser
+    """
     urls = []
     ssl._create_default_https_context = ssl._create_unverified_context
-    html = urllib.urlopen(initial_url)
-    soup = BeautifulSoup(html.read())
+    #html = urllib.urlopen(initial_url)
+    soup = BeautifulSoup((urllib.urlopen(initial_url)).read())
     table = soup.find('tbody')
     rows = table.find_all('tr')
     for row in rows:
@@ -23,14 +28,21 @@ def find_urls(initial_url):
         elif link.find('a').get('href') != None:
             urls.append('https://fbref.com'+ str(link.find('a').get('href')))
 
+    #urls = [if row.find('td', {'class':'center', 'data-stat': 'score'}).find('a') == None for row in rows]
+
     return urls[0:5]
 
 
 def scrape_data(intialurl):
-    # creating lists for webscraping
+    """
+    :param intialurl:
+    :return: Maybe considering just taking list of urls? Project is specialized for fb ref.
+    Feel like not going to be scalable.
+    """
     playerstats = {}
 
     urls = find_urls(intialurl)
+
     for url in urls:
         teams = {}
         score = 0
@@ -75,7 +87,7 @@ def scrape_data(intialurl):
     print(playerstats)
     # creating dataframe with data, indexvals and columns
     df = pd.DataFrame.from_dict(playerstats, orient='index')
-    df.to_csv('trying.csv')
+    #df.to_csv('trying.csv')
     df = df.fillna(0)
     # converting to float to alter later
     return df
